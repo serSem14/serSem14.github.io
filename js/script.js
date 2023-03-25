@@ -26,77 +26,91 @@ $(document).ready(function() {
     
     // взаємодія з альбомом
     $('#album img').on('click', function() {
-    // отримуємо шлях до вибраного зображення
-    var src = $(this).attr('src');
+      // отримуємо шлях до вибраного зображення
+      var src = $(this).attr('src');
 
-    // створюємо модальне вікно з великим зображенням
-    $('body').append('<div id="modal"><img src="' + src + '" alt="Modal"></div>');
-    // з'явлення модального вікна з плавною анімацією
-    $('#modal').fadeIn(200);
-    // додаткові стилі для модального вікна та зображення
-    $('#modal').css({
-      'position': 'fixed',
-      'top': 0,
-      'left': 0,
-      'width': '100%',
-      'height': '100%',
-      'background-color': 'rgba(0, 0, 0, 0.7)',
-      'display': 'flex',
-      'justify-content': 'center',
-      'align-items': 'center',
-      'z-index': 999,
-    });
-  
-    $('#modal img').css({
-      'max-width': '90%',
-      'max-height': '90%',
-    });
-
-    $('#modal img').on('click', function() {
-      if ($(this).hasClass('zoomed')) {
-        $(this).css({'transform': 'scale(1)', 'cursor': 'zoom-in'});
-        $(this).removeClass('zoomed');
-      } else {
-        $(this).css({'transform' : 'scale(1.5)', 'cursor': 'move'});
-        $(this).addClass('zoomed');
-      }
-    });
+      // створюємо модальне вікно з великим зображенням
+      $('body').append('<div id="modal"><img src="' + src + '" alt="Modal"></div>');
+      // з'явлення модального вікна з плавною анімацією
+      $('#modal').fadeIn(200);
+      // додаткові стилі для модального вікна та зображення
+      $('#modal').css({
+        'position': 'fixed',
+        'top': 0,
+        'left': 0,
+        'width': '100%',
+        'height': '100%',
+        'background-color': 'rgba(0, 0, 0, 0.7)',
+        'display': 'flex',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'z-index': 999,
+      });
     
-    $('#modal img').on('mousemove', function(event) {
-      if ($(this).hasClass('zoomed') && event.buttons === 1) {
-        var mouseX = event.pageX - $(this).offset().left;
-        var mouseY = event.pageY - $(this).offset().top;
-        var translateX = ((mouseX / $(this).width()) - 0.5) * 300;
-        var translateY = ((mouseY / $(this).height()) - 0.5) * 300;
-        $(this).css('transform', 'scale(1.5) translate(' + translateX + 'px, ' + translateY + 'px)');
-      }
-    });
-    
-    $('#modal img').on('mousedown', function(event) {
-      if ($(this).hasClass('zoomed') && event.buttons === 1) {
-        $(this).css({'cursor': 'grabbing'});
-        $(this).on('mouseleave', function() {
-          $(this).css({'cursor': 'move'});
-        });
-      }
-    });
-    
-    $('#modal img').on('mouseup', function(event) {
-      $(this).css({'cursor': 'move'});
-      $(this).off('mouseleave');
-    });
+      $('#modal img').css({
+        'max-width': '90%',
+        'max-height': '90%',
+      });
 
-    // закриваємо модальне вікно при кліку на зображення або поза ним
-    $('#modal, #modal img').on('click', function(event) {
-        if ($(event.target).is('#modal')) {
-          // зникнення модального вікна з плавною анімацією
-          $('#modal').fadeOut(200, function() {
-            $(this).remove();
-          });
-        }
-    });
+      // ===================================================================
+      // зум і переміщення зображення
+      var mouseX;
+      var mouseY;
+      var mouseDown = false;
+      var scale = 1;
+      var translateX = 0;
+      var translateY = 0;
+    
+      $('#modal img').on('mousedown', function(event) {
+          $(this).css({'cursor': 'grabbing'});
+          mouseX = event.pageX;
+          mouseY = event.pageY;
+          mouseDown = true;
+      });
+    
+      $('#modal img').on('mouseup', function(event) {
+         $(this).css({'cursor': 'grab'});
+          mouseDown = false;
+      });
+    
+      $('#modal img').on('mousemove', function(event) {
+          if (mouseDown) {
+              event.preventDefault();
+              var newMouseX = event.pageX;
+              var newMouseY = event.pageY;
+              var deltaX = newMouseX - mouseX;
+              var deltaY = newMouseY - mouseY;
+              translateX += deltaX;
+              translateY += deltaY;
+              mouseX = newMouseX;
+              mouseY = newMouseY;
+              $(this).css('transform', 'scale(' + scale + ') translate(' + translateX + 'px, ' + translateY + 'px)');
+          }
+      });
+    
+      $('#modal img').on('wheel', function(event) {
+          event.preventDefault();
+          if (event.originalEvent.deltaY > 0) {
+              scale /= 1.1;
+          } else {
+              scale *= 1.1;
+          }
+          $(this).css('transform', 'scale(' + scale + ') translate(' + translateX + 'px, ' + translateY + 'px)');
+      });
 
-    });
+      // ===================================================================
+
+      // закриваємо модальне вікно при кліку на зображення або поза ним
+      $('#modal, #modal img').on('click', function(event) {
+          if ($(event.target).is('#modal')) {
+            // зникнення модального вікна з плавною анімацією
+            $('#modal').fadeOut(200, function() {
+              $(this).remove();
+            });
+          }
+      });
+
+      });
     
 });
 
