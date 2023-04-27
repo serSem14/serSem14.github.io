@@ -112,6 +112,21 @@ $(document).ready(function() {
 
       });
 
+      let contacts = document.querySelectorAll('.footer_wrapper_contacts');
+      let menu = document.querySelector('.menu');
+      let simbolBeck = document.querySelectorAll('.menu_slide_simbol');
+      
+      contacts.forEach(function(contact) {
+        contact.addEventListener('click', function() {
+          menu.style.transform = 'translateX(0)';
+        });
+      });
+      
+      simbolBeck.forEach(function(simbol) {
+        simbol.addEventListener('click', function() {
+          menu.style.transform = 'translateX(100%)';
+        });
+      });
     
 });
 
